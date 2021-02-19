@@ -5,14 +5,14 @@ from torch import optim
 from torch.autograd import Variable
 from torch.nn import functional as F
 from utils import batch_generator
-from utils import nb_classes
-from utils import nb_postags
-from utils import nb_chunktags
+# from utils import nb_classes
+# from utils import nb_postags
+# from utils import nb_chunktags
 from utils import max_sentence_size
-from utils import vec2word
+# from utils import vec2word
 from utils import np2autograd
-from lang_model import CharacterLanguageModel
-from lang_model import embedding_size
+# from lang_model import CharacterLanguageModel
+# from lang_model import embedding_size
 # from pos_tag import POSTag
 # from chunking import Chunking
 # from dependency import Dependency

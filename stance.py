@@ -5,16 +5,18 @@ from torch import optim
 from torch.autograd import Variable
 from torch.nn import functional as F
 from utils import batch_generator
-from utils import nb_classes
-from utils import nb_postags
+# from utils import nb_classes
+# from utils import nb_postags
 from utils import max_sentence_size
 from utils import avg_cross_entropy_loss
-from lang_model import CharacterLanguageModel
-from lang_model import embedding_size
+# from lang_model import CharacterLanguageModel
+# from lang_model import embedding_size
 
 # Hyperparams
 postag_hn_size = 100
 postag_nb_layers = 2
+embedding_size = 50
+nb_postags = 36
 
 
 class StanceClassification(nn.Module):
@@ -23,7 +25,7 @@ class StanceClassification(nn.Module):
     """
 
     def __init__(self):
-        super(POSTag, self).__init__()
+        super(StanceClassification, self).__init__()
 
         self.w = nn.Parameter(torch.randn(postag_nb_layers * 2,
                                           max_sentence_size,
