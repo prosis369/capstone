@@ -15,7 +15,7 @@ from utils import avg_cross_entropy_loss
 # Hyperparams
 postag_hn_size = 100
 postag_nb_layers = 2
-embedding_size = 50
+embedding_size = 512
 nb_postags = 36
 
 
@@ -44,6 +44,8 @@ class StanceClassification(nn.Module):
 
     def forward(self, x):
         # Runs the LSTM for each word-vector in the sentence x
+        x = [x]
+        x = torch.tensor(x, dtype=torch.float32)
         out, hn = self.bi_lstm(x, (self.h[:, :x.size(1), :],
                                    self.w[:, :x.size(1), :]))
 

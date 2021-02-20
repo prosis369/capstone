@@ -7,6 +7,7 @@ from torch.nn import functional as F
 from torch.autograd import Variable
 from nltk.tokenize import word_tokenize
 from sklearn.preprocessing import OneHotEncoder
+from pytorch_pretrained_bert import BertTokenizer, BertConfig
 
 dataset_file = './train.csv'
 
@@ -139,19 +140,31 @@ def sent2vec(sentence):
     """ Returns the char-vector word representation
         of a given sentence.
     """
+    # print(sentence)
     tokens = [tokenizer.tokenize(sentence)]
-    vecs = [tokenizer.convert_tokens_to_ids(tokens)]
+    # print((tokens))
+    # tokens = tokens.numpy
+    vecs = [tokenizer.convert_tokens_to_ids(tokens[0])]
+    # print(len(vecs[0]))
     return vecs
 
+def sent2bert(sentence):
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    # tokenized_texts = [tokenizer.tokenize(sent) for sent in df['Tweet'].values]
+    tokenized_texts = [tokenizer.tokenize(sentence)]
+    # tokenizer.convert_tokens_to_ids(tokenizer.tokenize())
+    vecs = [tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts]
+    print(len(vecs[0]))
+    return vecs
 
-def vec2sent(vec):
-    """ Converts a char-vector word representation
-        sentence to its respective string.
-    """
-    words = [vec2word(v) for v in vec if type(v) == list]
-    sent = " ".join(words)
+# def vec2sent(vec):
+#     """ Converts a char-vector word representation
+#         sentence to its respective string.
+#     """
+#     words = [vec2word(v) for v in vec if type(v) == list]
+#     sent = " ".join(words)
 
-    return sent
+#     return sent
 
 
 # def sent2tags(sentence):
@@ -247,9 +260,15 @@ def batch_generator(batch_size, nb_batches, skip_batches=None):
         # text, tags, chunks = [], [], []
         text = []
 
+        # print(len(chunk['Tweet'].values))
+        
+
         for sent in chunk['Tweet'].values:
+            # print(len(sent))
             # tags.append(sent2tags(sent))
-            text.append(sent2vec(sent))
+            # sent = sent[:4]
+            # text.append(sent2vec(sent))
+            text.append(sent2bert(sent))
             # chunks.append(sent2chunk(sent))
 
         # The sentiment of the review where 1 is positive and 0 is negative

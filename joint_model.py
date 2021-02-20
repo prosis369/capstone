@@ -24,7 +24,7 @@ learning_rate = 1e-3
 postag_reg = 1e-3
 chunking_reg = 1e-3
 sentiment_reg = 1e-3
-
+stance_reg = 1e-3
 
 class JointMultiTaskModel(nn.Module):
     def __init__(self, mode='all'):
@@ -75,8 +75,9 @@ class JointMultiTaskModel(nn.Module):
 
     def run_all(self, x):
         # sentence = self.embedded_batch(x)
-
+        # print(x)
         for s in x:
+            # print(len(s[0]))
             y_sentiment = self.get_sentiment(s)
             y_stance = self.get_stance(s)
 
@@ -87,7 +88,9 @@ class JointMultiTaskModel(nn.Module):
             yield y_sentiment, y_stance
 
     def forward(self, x):
+        # print(len(x))
         out = self.run_all(x)
+        # print(out)
         out = list(out)
 
         return out
@@ -110,15 +113,19 @@ class JointMultiTaskModel(nn.Module):
 
         return loss
 
-    def sentiment_loss(self, y, yt):
+    def stance_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
-               + (self.sentiment.w.norm() ** 2) * sentiment_reg
+               + (self.stance.w.norm() ** 2) * stance_reg
 
         return loss
 
     def loss(self, y, sentiment, stance):
+        # print("Hi i am in loss")
         losses = []
+        # print("Hi i am in loss line 2")
         length = len(y)
+        # print("Hi i am in loss line 3")
+        # print(length)
 
         for i in range(length):
 
@@ -154,7 +161,8 @@ class JointMultiTaskModel(nn.Module):
 
 
 nb_epochs = 10
-batch_size = 47
+# batch_size = 47
+batch_size = 1
 nb_batches = 62
 # 2914
 
@@ -165,7 +173,10 @@ adam = optim.Adam(model.parameters(), lr=learning_rate)
 
 for epoch in range(nb_epochs):
     for batch in range(nb_batches):
+        # print(len(next(gen)[0]))
         text, sent, stance = next(gen)
+        # print(text)
+        # print(len(text))
         out = model.forward(text)
 
         # loss = model.loss(out, tags, chunks, sent)
@@ -175,5 +186,6 @@ for epoch in range(nb_epochs):
               "Loss:", loss.data[0])
 
         adam.zero_grad()
-        loss.backward()
+        # loss.backward()
+        loss.sum().backward()
         adam.step()
