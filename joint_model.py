@@ -159,8 +159,18 @@ class JointMultiTaskModel(nn.Module):
 
         return loss
 
+def accuracy(out, sent, stance):
+    print(out)
+    print(sent)
+    print(stance)
+    # x, y = batch
+    # y_pred = (model.forward(text)).type(torch.FloatTensor) 
+    # y = y.unsqueeze(1)
+    # correct = (y_pred == y).type(torch.FloatTensor) 
+    # return correct.mean()
+    # print(y_pred)
 
-nb_epochs = 10
+nb_epochs = 1
 # batch_size = 47
 batch_size = 1
 nb_batches = 62
@@ -171,8 +181,15 @@ gen = batch_generator(batch_size, nb_batches)
 model = JointMultiTaskModel()
 adam = optim.Adam(model.parameters(), lr=learning_rate)
 
+train_epoch_acc = []
+
 for epoch in range(nb_epochs):
+
+    train_batch_loss = []
+    train_batch_acc = []
+
     for batch in range(nb_batches):
+        # print("batch", batch)
         # print(len(next(gen)[0]))
         text, sent, stance = next(gen)
         # print(text)
@@ -189,3 +206,10 @@ for epoch in range(nb_epochs):
         # loss.backward()
         loss.sum().backward()
         adam.step()
+        # print("out", out)
+        model.eval() # enter evaluation mode
+        with torch.no_grad():
+              train_batch_acc.append(accuracy(out, sent, stance)) # evaluate mini-batch train accuracy in evaluation
+        print(train_batch_acc)
+# print(train_epoch_acc.append(torch.tensor(train_batch_acc)))
+

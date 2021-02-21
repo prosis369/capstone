@@ -8,6 +8,8 @@ from torch.autograd import Variable
 from nltk.tokenize import word_tokenize
 from sklearn.preprocessing import OneHotEncoder
 from pytorch_pretrained_bert import BertTokenizer, BertConfig
+from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 dataset_file = './train.csv'
 
@@ -147,15 +149,55 @@ def sent2vec(sentence):
     vecs = [tokenizer.convert_tokens_to_ids(tokens[0])]
     # print(len(vecs[0]))
     return vecs
+'''
+def preprocessing_for_bert(data, tokenizer):
+    input_ids = []
+    attention_masks = []
 
+    # For every sentence...
+    for sent in data:
+        encoded_sent = tokenizer.encode_plus(
+            text=text_preprocessing(sent),  # Preprocess sentence
+            add_special_tokens=True,        # Add `[CLS]` and `[SEP]`
+            max_length=MAX_LEN,                  # Max length to truncate/pad
+            pad_to_max_length=True,         # Pad sentence to max length
+            #return_tensors='pt',           # Return PyTorch tensor
+            truncation = True,
+            return_attention_mask=True      # Return attention mask
+            )
+        input_ids.append(encoded_sent.get('input_ids'))
+        attention_masks.append(encoded_sent.get('attention_mask'))
+
+    # Convert lists to tensors
+    input_ids = torch.tensor(input_ids)
+    attention_masks = torch.tensor(attention_masks)
+
+    return input_ids, attention_masks
+'''
 def sent2bert(sentence):
+  '''
+    MAX_SEQUENCE_LENGTH = 100
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     # tokenized_texts = [tokenizer.tokenize(sent) for sent in df['Tweet'].values]
     tokenized_texts = [tokenizer.tokenize(sentence)]
     # tokenizer.convert_tokens_to_ids(tokenizer.tokenize())
-    vecs = [tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts]
+    # vecs = [tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts]
+    vecs = pad_sequences([tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts],
+                          maxlen=MAX_SEQUENCE_LENGTH, dtype="long", truncating="post", padding="post")
     print(len(vecs[0]))
     return vecs
+
+  
+  tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+  token_ids = list(preprocessing_for_bert([sentence], tokenizer)[0].squeeze().numpy())
+  return token_ids
+  '''
+  # print(len(sentence))
+  tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+  batch = tokenizer(sentence, max_length = 512, padding='max_length', truncation=True, return_tensors="pt")
+  # print(batch['input_ids'].tolist())
+  return batch['input_ids'].tolist()
+  
 
 # def vec2sent(vec):
 #     """ Converts a char-vector word representation
