@@ -87,7 +87,7 @@ from utils import avg_cross_entropy_loss
 postag_hn_size = 100
 postag_nb_layers = 2
 embedding_size = 512
-nb_postags = 36
+nb_postags = 1
 
 
 class SentimentClassification(nn.Module):

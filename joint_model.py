@@ -18,6 +18,7 @@ from utils import np2autograd
 # from dependency import Dependency
 from sentiment import SentimentClassification
 from stance import StanceClassification
+from sklearn.metrics import accuracy_score
 
 # Hyperparams
 learning_rate = 1e-3
@@ -159,8 +160,57 @@ class JointMultiTaskModel(nn.Module):
 
         return loss
 
+def compare(out):
 
-nb_epochs = 10
+    # print(out)
+    # actual_sent = actual_sent[0][0]
+    # actual_stance = actual_stance[0][0]
+    # print(out[0][0].detach())
+    # print(out[0][1].detach())
+
+    # print(out[0][0].numpy()[0][0])
+    predicted_sent = out[0][0].numpy()[0][0]
+    predicted_stance = out[0][1].numpy()[0][0]
+
+    if predicted_sent >= 0.5:
+      predicted_sent = 1
+    elif predicted_sent <= -0.5:
+      predicted_sent = -1
+    else:
+      predicted_sent = 0
+    
+    if predicted_stance >= 0.5:
+      predicted_stance = 1
+    elif predicted_sent <= -0.5:
+      predicted_stance = -1
+    else:
+      predicted_stance = 0
+
+    return [predicted_sent, predicted_stance]
+
+def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches):
+
+  pred_sent = []
+  pred_stance = []
+
+  l = len(train_batch_acc)
+
+  for i in range(l):
+    pred_sent.append(train_batch_acc[i][0])
+    pred_stance.append(train_batch_acc[i][1])
+
+  print(pred_sent)
+  print(sent_nb_batches)
+  print(pred_stance)
+  print(stance_nb_batches)
+
+  sent_acc = accuracy_score(sent_nb_batches, pred_sent)
+  stance_acc = accuracy_score(stance_nb_batches, pred_stance)
+  
+  return(sent_acc, stance_acc)
+
+
+nb_epochs = 3
 # batch_size = 47
 batch_size = 1
 nb_batches = 62
@@ -171,12 +221,25 @@ gen = batch_generator(batch_size, nb_batches)
 model = JointMultiTaskModel()
 adam = optim.Adam(model.parameters(), lr=learning_rate)
 
+train_epoch_acc = []
+
 for epoch in range(nb_epochs):
+
+    train_batch_loss = []
+    train_batch_acc = []
+
+    sent_nb_batches = []
+    stance_nb_batches = []
+
     for batch in range(nb_batches):
+        # print("batch", batch)
         # print(len(next(gen)[0]))
         text, sent, stance = next(gen)
-        # print(text)
+        print(text)
         # print(len(text))
+        sent_nb_batches.append(sent[0][0])
+        stance_nb_batches.append(stance[0][0])
+
         out = model.forward(text)
 
         # loss = model.loss(out, tags, chunks, sent)
@@ -189,3 +252,12 @@ for epoch in range(nb_epochs):
         # loss.backward()
         loss.sum().backward()
         adam.step()
+        # print("out", out)
+        model.eval() # enter evaluation mode
+        with torch.no_grad():
+              train_batch_acc.append(compare(out)) # evaluate mini-batch train accuracy in evaluation
+    acc = accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches)
+    print("Epoch: ", epoch, "Sentiment Accuracy: ", acc[0], "Stance Accuracy: ", acc[1])
+
+# train_epoch_acc.append(torch.tensor(train_batch_acc)
+
