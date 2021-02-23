@@ -174,14 +174,14 @@ def compare(out):
 
     if predicted_sent >= 0.5:
       predicted_sent = 1
-    elif predicted_sent <= -0.5:
+    elif predicted_sent < 0:
       predicted_sent = -1
     else:
       predicted_sent = 0
     
     if predicted_stance >= 0.5:
       predicted_stance = 1
-    elif predicted_sent <= -0.5:
+    elif predicted_sent < 0:
       predicted_stance = -1
     else:
       predicted_stance = 0
@@ -210,7 +210,7 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches):
   return(sent_acc, stance_acc)
 
 
-nb_epochs = 3
+nb_epochs = 15
 # batch_size = 47
 batch_size = 1
 nb_batches = 62
