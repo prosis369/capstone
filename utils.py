@@ -96,12 +96,64 @@ def avg_cross_entropy_loss(predicted, targets):
 def get_dataset(batch_size, skip=None):
     """ Gets the dataset iterator
     """
+    # dataset = pd.read_csv(dataset_file,
+    #                       iterator=True,
+    #                       skiprows=range(1, skip * batch_size) if skip else None,
+    #                       chunksize=batch_size)
+
+    skiprowsValue = 0
+    if skip:
+      skiprowsValue = skip*batch_size
+    else:
+      skiprowsValue = None
     dataset = pd.read_csv(dataset_file,
                           iterator=True,
-                          skiprows=range(1, skip * batch_size) if skip else None,
+                          skiprows = [i for i in range(1, skiprowsValue)] if skip else None,
                           chunksize=batch_size)
+
     return dataset
 
+def batch_generator(batch_size, nb_batches, skip_batches=None):
+    """ Batch generator for the many task joint model.
+    """
+    batch_count = 0
+    dataset = get_dataset(batch_size, skip_batches)
+    batch_number = 1
+
+    while True:
+        chunk = dataset.get_chunk()
+
+        # text, tags, chunks = [], [], []
+        text = []
+
+        # print(len(chunk['Tweet'].values))
+        
+
+        for sent in chunk['Tweet'].values:
+            # print(len(sent))
+            # tags.append(sent2tags(sent))
+            # sent = sent[:4]
+            # text.append(sent2vec(sent))
+            text.append(sent2bert(sent))
+            # chunks.append(sent2chunk(sent))
+
+        # The sentiment of the review where 1 is positive and 0 is negative
+        # sent = (chunk['Score'] >= 4).values
+        # sent = np.int32(sent).reshape(-1, 1)
+
+        sent = (chunk['Sentiment']).values
+        sent = np.int32(sent).reshape(-1, 1)
+        stance = (chunk['Stance']).values
+        stance = np.int32(stance).reshape(-1, 1)
+
+        yield text, sent, stance
+
+        batch_count += 1
+
+        if batch_count >= nb_batches:
+            dataset = get_dataset(batch_size, batch_number*nb_batches)
+            batch_number += 1
+            batch_count = 0
 
 # Bag of Chars
 # boc = get_dataset(boc_size).get_chunk()
@@ -288,44 +340,3 @@ def sent2bert(sentence):
 #     out = [chk2k.get(chk) for chk in out]
 #
 #     return out
-
-
-def batch_generator(batch_size, nb_batches, skip_batches=None):
-    """ Batch generator for the many task joint model.
-    """
-    batch_count = 0
-    dataset = get_dataset(batch_size, skip_batches)
-
-    while True:
-        chunk = dataset.get_chunk()
-
-        # text, tags, chunks = [], [], []
-        text = []
-
-        # print(len(chunk['Tweet'].values))
-        
-
-        for sent in chunk['Tweet'].values:
-            # print(len(sent))
-            # tags.append(sent2tags(sent))
-            # sent = sent[:4]
-            # text.append(sent2vec(sent))
-            text.append(sent2bert(sent))
-            # chunks.append(sent2chunk(sent))
-
-        # The sentiment of the review where 1 is positive and 0 is negative
-        # sent = (chunk['Score'] >= 4).values
-        # sent = np.int32(sent).reshape(-1, 1)
-
-        sent = (chunk['Sentiment']).values
-        sent = np.int32(sent).reshape(-1, 1)
-        stance = (chunk['Stance']).values
-        stance = np.int32(stance).reshape(-1, 1)
-
-        yield text, sent, stance
-
-        batch_count += 1
-
-        if batch_count >= nb_batches:
-            dataset = get_dataset(batch_size)
-            batch_count = 0
