@@ -19,6 +19,7 @@ from utils import np2autograd
 from sentiment import SentimentClassification
 from stance import StanceClassification
 from sklearn.metrics import accuracy_score
+# from predict import prediction
 
 # Hyperparams
 learning_rate = 1e-3
@@ -210,10 +211,10 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches):
   return(sent_acc, stance_acc)
 
 
-nb_epochs = 15
+nb_epochs = 1
 # batch_size = 47
 batch_size = 1
-nb_batches = 62
+nb_batches = 2914
 # 2914
 
 gen = batch_generator(batch_size, nb_batches)
@@ -235,7 +236,8 @@ for epoch in range(nb_epochs):
         # print("batch", batch)
         # print(len(next(gen)[0]))
         text, sent, stance = next(gen)
-        print(text)
+        # print(type(text))
+        # print(text)
         # print(len(text))
         sent_nb_batches.append(sent[0][0])
         stance_nb_batches.append(stance[0][0])
@@ -260,4 +262,4 @@ for epoch in range(nb_epochs):
     print("Epoch: ", epoch, "Sentiment Accuracy: ", acc[0], "Stance Accuracy: ", acc[1])
 
 # train_epoch_acc.append(torch.tensor(train_batch_acc)
-
+# prediction(model)
