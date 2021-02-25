@@ -211,7 +211,7 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches):
   return(sent_acc, stance_acc)
 
 
-nb_epochs = 1
+nb_epochs = 5
 # batch_size = 47
 batch_size = 1
 nb_batches = 2914

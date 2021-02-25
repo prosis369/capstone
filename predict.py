@@ -67,16 +67,18 @@ def prediction(model):
     # print(tweets[0])
 
     y_pred = []
-    for i in range(468,488):
+    # for i in range(468,488):
+    for i in range(len(tweets)):
         row = sent2bert(tweets[i])
         yhat = model.forward([row])
         # print(type(yhat))
         # yhat = yhat.detach().numpy()
-        print("Tweet ", i, "done in test dataset")
+        print("Tweet", i, "done in test dataset")
         y_pred.append(compare(yhat))
     # print(row)
 
-    test_acc = accuracy(y_pred, list(dataset['Sentiment'])[468:488],list(dataset['Stance'])[468:488])
+    # test_acc = accuracy(y_pred, list(dataset['Sentiment'])[468:488],list(dataset['Stance'])[468:488])
+    test_acc = accuracy(y_pred, list(dataset['Sentiment']),list(dataset['Stance']))
     print("Test dataset:", "Sentiment Accuracy: ", test_acc[0], "Stance Accuracy: ", test_acc[1])
     # print(yhat)
 
