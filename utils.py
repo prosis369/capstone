@@ -101,14 +101,15 @@ def get_dataset(batch_size, skip=None):
     #                       skiprows=range(1, skip * batch_size) if skip else None,
     #                       chunksize=batch_size)
 
-    skiprowsValue = 0
-    if skip:
-      skiprowsValue = skip*batch_size
-    else:
-      skiprowsValue = None
+    # skiprowsValue = 0
+    # if skip:
+    #   skiprowsValue = skip*batch_size
+    # else:
+    #   skiprowsValue = None
     dataset = pd.read_csv(dataset_file,
                           iterator=True,
-                          skiprows = [i for i in range(1, skiprowsValue)] if skip else None,
+                          # skiprows = [i for i in range(1, skiprowsValue)] if skip else None,
+                          skiprows=range(1, skip * batch_size) if skip else None,
                           chunksize=batch_size)
 
     return dataset
@@ -118,7 +119,7 @@ def batch_generator(batch_size, nb_batches, skip_batches=None):
     """
     batch_count = 0
     dataset = get_dataset(batch_size, skip_batches)
-    batch_number = 1
+    # batch_number = 1
 
     while True:
         chunk = dataset.get_chunk()
@@ -151,8 +152,9 @@ def batch_generator(batch_size, nb_batches, skip_batches=None):
         batch_count += 1
 
         if batch_count >= nb_batches:
-            dataset = get_dataset(batch_size, batch_number*nb_batches)
-            batch_number += 1
+            # dataset = get_dataset(batch_size, batch_number*nb_batches)
+            # batch_number += 1
+            dataset = get_dataset(batch_size)
             batch_count = 0
 
 # Bag of Chars
