@@ -18,6 +18,7 @@ from utils import np2autograd
 # from dependency import Dependency
 from sentiment import SentimentClassification
 from stance import StanceClassification
+from emotion import EmotionClassification
 from sklearn.metrics import accuracy_score
 # from predict import prediction
 
@@ -27,6 +28,7 @@ postag_reg = 1e-3
 chunking_reg = 1e-3
 sentiment_reg = 1e-3
 stance_reg = 1e-3
+emotion_reg = 1e-3
 
 class JointMultiTaskModel(nn.Module):
     def __init__(self, mode='all'):
@@ -40,40 +42,48 @@ class JointMultiTaskModel(nn.Module):
         self.sentiment = SentimentClassification()
         self.stance = StanceClassification()
 
+        self.emotion_anger = EmotionClassification()
+        self.emotion_anticipation = EmotionClassification()
+        self.emotion_disgust = EmotionClassification()
+        self.emotion_fear = EmotionClassification()
+        self.emotion_joy = EmotionClassification()
+        self.emotion_sadness = EmotionClassification()
+        self.emotion_suprise = EmotionClassification()
+        self.emotion_trust = EmotionClassification()
+
+
         # Mode - all or module_name
         self.mode = mode
-
-    # def embedded_batch(self, batch_x):
-    #     embedded_batch = self.lang_model(batch_x)
-    #
-    #     for batch in embedded_batch:
-    #         sent = np.zeros((1, len(batch), embedding_size), dtype=np.float32)
-    #
-    #         for i, word in enumerate(batch):
-    #             sent[0, i] = word.data.numpy()
-    #
-    #         sent = torch.from_numpy(sent)
-    #         sent = Variable(sent)
-    #
-    #         yield sent
-
-    # def get_postag(self, sentence):
-    #     return self.postag(sentence)
-    #
-    # def get_chunking(self, sentence, tags, h_tags):
-    #     return self.chunking(sentence, tags, h_tags)
-    #
-    # def get_dependency(self, sentence, tags, h_tags, chunks, h_chunks):
-    #     return self.dependency(sentence, tags, h_tags, chunks, h_chunks)
-    #
-    # def get_sentiment(self, sentence, tags, h_tags, chunks, h_chunks, deps, h_deps):
-    #     return self.sentiment(sentence, tags, h_tags, chunks, h_chunks, deps, h_deps)
 
     def get_sentiment(self, sentence):
         return self.sentiment(sentence)
 
     def get_stance(self, sentence):
         return self.stance(sentence)
+    
+    def get_emotion_anger(self, sentence):
+        return self.emotion_anger(sentence)
+
+    def get_emotion_anticipation(self, sentence):
+        return self.emotion_anticipation(sentence)
+    
+    def get_emotion_fear(self, sentence):
+        return self.emotion_fear(sentence)
+    
+    def get_emotion_disgust(self, sentence):
+        return self.emotion_disgust(sentence)
+    
+    def get_emotion_joy(self, sentence):
+        return self.emotion_joy(sentence)
+
+    def get_emotion_sadness(self, sentence):
+        return self.emotion_sadness(sentence)
+    
+    def get_emotion_suprise(self, sentence):
+        return self.emotion_suprise(sentence)
+
+    def get_emotion_trust(self, sentence):
+        return self.emotion_trust(sentence)
 
     def run_all(self, x):
         # sentence = self.embedded_batch(x)
@@ -82,12 +92,16 @@ class JointMultiTaskModel(nn.Module):
             # print(len(s[0]))
             y_sentiment = self.get_sentiment(s)
             y_stance = self.get_stance(s)
+            y_emotion_anger = self.get_emotion_anger(s)
+            y_emotion_anticipation = self.get_emotion_anticipation(s)
+            y_emotion_disgust = self.get_emotion_disgust(s)
+            y_emotion_fear = self.get_emotion_fear(s)
+            y_emotion_joy = self.get_emotion_joy(s)
+            y_emotion_sadness = self.get_emotion_sadness(s)
+            y_emotion_suprise = self.get_emotion_suprise(s)
+            y_emotion_trust = self.get_emotion_trust(s)
 
-            # y_chk, h_chk = self.get_chunking(s, y_pos, h_pos)
-            # y_dep, h_dep = self.get_dependency(s, y_pos, h_pos, y_chk, h_chk)
-            # y_sent, h_sent = self.get_sentiment(s, y_pos, h_pos, y_chk, h_chk, y_dep, h_dep)
-
-            yield y_sentiment, y_stance
+            yield y_sentiment, y_stance, y_emotion_anger, y_emotion_anticipation, y_emotion_disgust, y_emotion_fear, y_emotion_joy, y_emotion_sadness, y_emotion_suprise, y_emotion_trust
 
     def forward(self, x):
         # print(len(x))
@@ -97,17 +111,6 @@ class JointMultiTaskModel(nn.Module):
 
         return out
 
-    # def postag_loss(self, y, yt):
-    #     loss = F.cross_entropy(y, yt) \
-    #            + (self.postag.w.norm() ** 2) * postag_reg
-    #
-    #     return loss
-    #
-    # def chunking_loss(self, y, yt):
-    #     loss = F.cross_entropy(y, yt) \
-    #            + (self.chunking.w.norm() ** 2) * chunking_reg
-    #
-    #     return loss
 
     def sentiment_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
@@ -120,35 +123,89 @@ class JointMultiTaskModel(nn.Module):
                + (self.stance.w.norm() ** 2) * stance_reg
 
         return loss
+      
+    def emotion_anger_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_anger.w.norm() ** 2) * emotion_reg
 
-    def loss(self, y, sentiment, stance):
+        return loss
+    
+    def emotion_anticipation_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_anticipation.w.norm() ** 2) * emotion_reg
+
+        return loss
+    
+    def emotion_disgust_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_disgust.w.norm() ** 2) * emotion_reg
+
+        return loss
+    
+    def emotion_fear_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_fear.w.norm() ** 2) * emotion_reg
+
+        return loss
+
+    def emotion_joy_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_joy.w.norm() ** 2) * emotion_reg
+
+        return loss
+    
+    def emotion_sadness_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_sadness.w.norm() ** 2) * emotion_reg
+
+        return loss
+      
+    def emotion_suprise_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_suprise.w.norm() ** 2) * emotion_reg
+
+        return loss
+    
+    def emotion_trust_loss(self, y, yt):
+        loss = (yt.float() - y) ** 2 \
+               + (self.emotion_trust.w.norm() ** 2) * emotion_reg
+
+        return loss
+      
+    def loss(self, y, sentiment, stance, anger, anticipation, disgust, fear, joy, sadness, suprise, trust):
         # print("Hi i am in loss")
         losses = []
         # print("Hi i am in loss line 2")
         length = len(y)
-        # print("Hi i am in loss line 3")
-        # print(length)
 
         for i in range(length):
 
-            # p_tag, r_tag = y[i][0], np2autograd(tags[i])
-            # p_chunk, r_chunk = y[i][1], np2autograd(chunks[i])
-            # p_sent, r_sent = y[i][3], np2autograd(sentiment[i])
-
             p_sent, r_sent = y[i][0], np2autograd(sentiment[i])
             p_stance, r_stance = y[i][1], np2autograd(stance[i])
+            p_anger, r_anger = y[i][2], np2autograd(anger[i])
+            p_anticipation, r_anticipation = y[i][3], np2autograd(anticipation[i])
+            p_disgust, r_disgust = y[i][4], np2autograd(disgust[i])
+            p_fear, r_fear = y[i][5], np2autograd(fear[i])
+            p_joy, r_joy = y[i][6], np2autograd(joy[i])
+            p_sadness, r_sadness = y[i][7], np2autograd(sadness[i])
+            p_suprise, r_suprise = y[i][8], np2autograd(suprise[i])
+            p_trust, r_trust = y[i][9], np2autograd(trust[i])
 
-            # loss_tag = self.postag_loss(p_tag, r_tag)
-            # loss_chk = self.chunking_loss(p_chunk, r_chunk)
 
             loss_sent = self.sentiment_loss(p_sent, r_sent)
             loss_stance = self.stance_loss(p_stance, r_stance)
+            loss_emotion_anger = self.emotion_anger_loss(p_anger, r_anger)
+            loss_emotion_anticipation = self.emotion_anticipation_loss(p_anticipation, r_anticipation)
+            loss_emotion_disgust = self.emotion_disgust_loss(p_disgust, r_disgust)
+            loss_emotion_fear = self.emotion_disgust_loss(p_fear, r_fear)
+            loss_emotion_joy = self.emotion_disgust_loss(p_joy, r_joy)
+            loss_emotion_sadness = self.emotion_disgust_loss(p_sadness, r_sadness)
+            loss_emotion_suprise = self.emotion_disgust_loss(p_suprise, r_suprise)
+            loss_emotion_trust = self.emotion_disgust_loss(p_trust, r_trust)
 
-            # loss = loss_tag * 0.3 + loss_chk * 0.2 + loss_sent * 0.5
-            # loss = loss / 3
 
-            loss = loss_sent * 0.5 + loss_stance * 0.5
-            loss = loss/2
+            loss = loss_sent * 0.1 + loss_stance * 0.1 + loss_emotion_anger * 0.1 + loss_emotion_anticipation * 0.1 + loss_emotion_disgust * 0.1 + loss_emotion_fear * 0.1 + loss_emotion_joy * 0.1 + loss_emotion_sadness * 0.1 + loss_emotion_suprise * 0.1 + loss_emotion_trust * 0.1
+            loss = loss/10
 
             losses.append(loss)
 
@@ -163,13 +220,6 @@ class JointMultiTaskModel(nn.Module):
 
 def compare(out):
 
-    # print(out)
-    # actual_sent = actual_sent[0][0]
-    # actual_stance = actual_stance[0][0]
-    # print(out[0][0].detach())
-    # print(out[0][1].detach())
-
-    # print(out[0][0].numpy()[0][0])
     predicted_sent = out[0][0].numpy()[0][0]
     predicted_stance = out[0][1].numpy()[0][0]
 
@@ -233,18 +283,14 @@ for epoch in range(nb_epochs):
     stance_nb_batches = []
 
     for batch in range(nb_batches):
-        # print("batch", batch)
-        # print(len(next(gen)[0]))
+
         text, sent, stance = next(gen)
-        # print(type(text))
-        # print(text)
-        # print(len(text))
+
         sent_nb_batches.append(sent[0][0])
         stance_nb_batches.append(stance[0][0])
 
         out = model.forward(text)
 
-        # loss = model.loss(out, tags, chunks, sent)
         loss = model.loss(out, sent, stance)
         print("Epoch:", epoch,
               "Batch:", batch,
@@ -261,5 +307,4 @@ for epoch in range(nb_epochs):
     acc = accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches)
     print("Epoch: ", epoch, "Sentiment Accuracy: ", acc[0], "Stance Accuracy: ", acc[1])
 
-# train_epoch_acc.append(torch.tensor(train_batch_acc)
-# prediction(model)
+
