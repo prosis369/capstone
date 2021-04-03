@@ -218,37 +218,76 @@ class JointMultiTaskModel(nn.Module):
 
         return loss
 
+def threshold(prediction, upperBound, lowerBound):
+  if predicted_sent >= upperBound:
+      predicted_sent = 1
+  elif predicted_sent < lowerBound:
+      predicted_sent = -1
+  else:
+      predicted_sent = 0
+
+
+
 def compare(out):
 
     predicted_sent = out[0][0].numpy()[0][0]
+    predicted_sent = threshold(predicted_sent, 0.5, 0)
+
     predicted_stance = out[0][1].numpy()[0][0]
+    predicted_stance = threshold(predicted_stance, 0.5, 0)
 
-    if predicted_sent >= 0.5:
-      predicted_sent = 1
-    elif predicted_sent < 0:
-      predicted_sent = -1
-    else:
-      predicted_sent = 0
+    predicted_emotion_anger = out[0][2].numpy()[0][0]
+    predicted_emotion_anger = threshold(predicted_emotion_anger, 0.5, 0)
+
+    predicted_emotion_anticipation = out[0][3].numpy()[0][0]
+    predicted_emotion_anticipation = threshold(predicted_emotion_anticipation, 0.5, 0)
+
+    predicted_emotion_disgust = out[0][4].numpy()[0][0]
+    predicted_emotion_disgust = threshold(predicted_emotion_disgust, 0.5, 0)
+
+    predicted_emotion_fear = out[0][5].numpy()[0][0]
+    predicted_emotion_fear = threshold(predicted_emotion_fear, 0.5, 0)
+
+    predicted_emotion_joy = out[0][6].numpy()[0][0]
+    predicted_emotion_joy = threshold(predicted_emotion_joy, 0.5, 0)
+
+    predicted_emotion_sadness = out[0][7].numpy()[0][0]
+    predicted_emotion_sadness = threshold(predicted_emotion_sadness, 0.5, 0)
+
+    predicted_emotion_suprise = out[0][8].numpy()[0][0]
+    predicted_emotion_suprise = threshold(predicted_emotion_suprise, 0.5, 0)
+
+    predicted_emotion_trust = out[0][9].numpy()[0][0]
+    predicted_emotion_trust = threshold(predicted_emotion_trust, 0.5, 0)
     
-    if predicted_stance >= 0.5:
-      predicted_stance = 1
-    elif predicted_sent < 0:
-      predicted_stance = -1
-    else:
-      predicted_stance = 0
-
-    return [predicted_sent, predicted_stance]
+    return [predicted_sent, predicted_stance, predicted_emotion_anger, predicted_emotion_anticipation, predicted_emotion_disgust, predicted_emotion_fear, predicted_emotion_joy, predicted_emotion_sadness, predicted_emotion_suprise, predicted_emotion_trust]
 
 def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches):
 
   pred_sent = []
   pred_stance = []
+  pred_emotion_anger = []
+  pred_emotion_anticipation = []
+  pred_emotion_disgust = []
+  pred_emotion_fear = []
+  pred_emotion_joy = []
+  pred_emotion_sadness = []
+  pred_emotion_suprise = []
+  pred_emotion_trust = []
 
   l = len(train_batch_acc)
 
   for i in range(l):
     pred_sent.append(train_batch_acc[i][0])
     pred_stance.append(train_batch_acc[i][1])
+    pred_emotion_anger.append(train_batch_acc[i][2])
+    pred_emotion_anticipation.append(train_batch_acc[i][3])
+    pred_emotion_disgust.append(train_batch_acc[i][4])
+    pred_emotion_fear.append(train_batch_acc[i][5])
+    pred_emotion_joy.append(train_batch_acc[i][6])
+    pred_emotion_sadness.append(train_batch_acc[i][7])
+    pred_emotion_suprise.append(train_batch_acc[i][8])
+    pred_emotion_trust.append(train_batch_acc[i][9])
 
   print(pred_sent)
   print(sent_nb_batches)
@@ -281,6 +320,10 @@ for epoch in range(nb_epochs):
 
     sent_nb_batches = []
     stance_nb_batches = []
+    emotion_anger_nb_batches = []
+    emotion_anticipation_nb_batches = []
+    emotion_disgust_nb_batches = []
+    emotion_
 
     for batch in range(nb_batches):
 
