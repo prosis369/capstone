@@ -11,7 +11,7 @@ from pytorch_pretrained_bert import BertTokenizer, BertConfig
 from transformers import BertTokenizer
 from transformers import AutoTokenizer
 
-dataset_file = './train.csv'
+dataset_file = './test.csv'
 
 from pytorch_pretrained_bert import BertTokenizer, BertConfig
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
@@ -130,8 +130,10 @@ def batch_generator(batch_size, nb_batches, skip_batches=None):
         surprise = np.int32(sent).reshape(-1, 1)
         trust = (chunk['Trust']).values
         trust = np.int32(sent).reshape(-1, 1)
+        bias = (chunk['Bias']).values
+        bias = np.int32(sent).reshape(-1, 1)
 
-        yield text, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust 
+        yield text, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias 
 
         batch_count += 1
 
