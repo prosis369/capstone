@@ -14,13 +14,13 @@ embedding_size = 512
 nb_postags = 1
 
 
-class StanceClassification(nn.Module):
+class BiasClassification(nn.Module):
     """ Returns the Part of Speech Tag for each word
         embedding in a given sentence.
     """
 
     def __init__(self):
-        super(StanceClassification, self).__init__()
+        super(BiasClassification, self).__init__()
 
         self.w = nn.Parameter(torch.randn(postag_nb_layers * 2,
                                           max_sentence_size,
