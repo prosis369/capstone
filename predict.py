@@ -88,6 +88,8 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
   print(sent_nb_batches)
   # print(pred_stance)
   # print(stance_nb_batches)
+  print(emotion_anger_nb_batches)
+  print(pred_emotion_anger)
 
   sent_acc = accuracy_score(sent_nb_batches, pred_sent)
   stance_acc = accuracy_score(stance_nb_batches, pred_stance)
@@ -107,7 +109,7 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
 def prediction(model):
     dataset_file = './train-completed.csv'
 
-    dataset = pd.read_csv(dataset_file)
+    dataset = pd.read_csv(dataset_file, nrows=450)
     tweets = list(dataset['Tweet'])
     # print(tweets[0])
     # print(tweets[0])
@@ -125,7 +127,7 @@ def prediction(model):
 
     # test_acc = accuracy(y_pred, list(dataset['Sentiment'])[468:488],list(dataset['Stance'])[468:488])
     test_acc = accuracy(y_pred, list(dataset['Sentiment']),list(dataset['Stance']), list(dataset['Anger']), list(dataset['Anticipation']), list(dataset['Disgust']), list(dataset['Fear']), list(dataset['Joy']), list(dataset['Sadness']), list(dataset['Surprise']), list(dataset['Trust']), list(dataset['Bias']))
-    print("Test dataset:", "Sentiment Accuracy: ", test_acc[0], "Stance Accuracy: ", test_acc[1])
+    print("Test dataset:", "Sentiment Accuracy: ", test_acc[0], "Stance Accuracy: ", test_acc[1], "Anger Accuracy: ", test_acc[2],"Anticipation Accuracy: ", test_acc[3],"Disgust Accuracy: ", test_acc[4],"Fear Accuracy: ", test_acc[5], "Joy Accuracy: ", test_acc[6], "Sadness Accuracy: ", test_acc[7], "Suprise Accuracy: ", test_acc[8], "Trust Accuracy: ", test_acc[9], "Bias Accuracy: ", test_acc[10])
     # print(yhat)
 
 prediction(model)
