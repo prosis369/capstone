@@ -1,5 +1,6 @@
 import nltk
 import torch
+import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +11,8 @@ from sklearn.preprocessing import OneHotEncoder
 from pytorch_pretrained_bert import BertTokenizer, BertConfig
 from transformers import BertTokenizer
 from transformers import AutoTokenizer
+from nltk.corpus import stopwords
+
 
 # dataset_file = './test.csv'
 
@@ -79,7 +82,30 @@ def get_dataset(batch_size, dataset_file, skip=None):
                           # skiprows = [i for i in range(1, skiprowsValue)] if skip else None,
                           skiprows=range(1, skip * batch_size) if skip else None,
                           chunksize=batch_size)
+    
+    dataset = dataset.reset_index(drop=True)
+    REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
+    BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
+    STOPWORDS = set(stopwords.words('english'))
 
+    def clean_text(text):
+      """
+        text: a string
+        
+        return: modified initial string
+      """
+      text = text.lower() # lowercase text
+      text = REPLACE_BY_SPACE_RE.sub(' ', text) # replace REPLACE_BY_SPACE_RE symbols by space in text. substitute the matched string in REPLACE_BY_SPACE_RE with space.
+      text = BAD_SYMBOLS_RE.sub('', text) # remove symbols which are in BAD_SYMBOLS_RE from text. substitute the matched string in BAD_SYMBOLS_RE with nothing. 
+      text = text.replace('x', '')
+#     text = re.sub(r'\W+', '', text)
+      text = ' '.join(word for word in text.split() if word not in STOPWORDS) # remove stopwors from text
+      return text
+
+    dataset['tweet'] = dataset['tweet'].apply(clean_text)
+    dataset['tweet'] = dataset['tweet'].str.replace('\d+', '')
+    dataset['tweet'] = "[CLS] " + dataset['tweet'] + " [SEP]"
+    
     return dataset
 
 def batch_generator(batch_size, nb_batches, dataset_file, skip_batches=None):
@@ -183,7 +209,7 @@ def batch_generator_bias(batch_size, nb_batches, dataset_file, skip_batches=None
         if batch_count >= nb_batches:
             # dataset = get_dataset(batch_size, batch_number*nb_batches)
             # batch_number += 1
-            dataset = get_dataset(batch_size, dataset_file)
+            dataset = get_dataset(batch_size)
             batch_count = 0
 
 

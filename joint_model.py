@@ -209,8 +209,13 @@ class JointMultiTaskModel(nn.Module):
             loss_emotion_trust = self.emotion_disgust_loss(p_trust, r_trust)
             loss_bias = self.bias_loss(p_bias, r_bias)
 
-            loss = (loss_sent * (1/11)) + (loss_stance * (1/11)) + (loss_emotion_anger * (1/11)) + (loss_emotion_anticipation * (1/11)) + (loss_emotion_disgust * (1/11)) + (loss_emotion_fear * (1/11)) + (loss_emotion_joy * (1/11)) + (loss_emotion_sadness * (1/11)) + (loss_emotion_surprise * (1/11)) + (loss_emotion_trust * (1/11)) + (loss_bias * (1/11))
-            loss = loss/11
+            sent_weight = 1
+            stance_weight = 1
+            bias_weight = 1
+            emotion_weight = 1
+            
+            loss = (loss_sent * (1/4)) + (loss_stance * (1/4)) + (loss_emotion_anger * (1/32)) + (loss_emotion_anticipation * (1/32)) + (loss_emotion_disgust * (1/32)) + (loss_emotion_fear * (1/32)) + (loss_emotion_joy * (1/32)) + (loss_emotion_sadness * (1/32)) + (loss_emotion_surprise * (1/32)) + (loss_emotion_trust * (1/32)) + (loss_bias * (1/4))
+            loss = loss/4
 
             losses.append(loss)
 
@@ -324,7 +329,7 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
 nb_epochs = 1
 # batch_size = 47
 batch_size = 1
-nb_batches = 1956
+nb_batches = 100
 # nb_batches = 1
 # 2914
 # 1956
