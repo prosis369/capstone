@@ -13,6 +13,8 @@ from emotion import EmotionClassification
 from bias import BiasClassification
 from sklearn.metrics import accuracy_score
 
+dataset_file = './test.csv'
+
 # Hyperparams
 learning_rate = 1e-3
 postag_reg = 1e-3
@@ -193,7 +195,7 @@ class JointMultiTaskModel(nn.Module):
             p_sadness, r_sadness = y[i][7], np2autograd(sadness[i])
             p_surprise, r_surprise = y[i][8], np2autograd(surprise[i])
             p_trust, r_trust = y[i][9], np2autograd(trust[i])
-            p_bias, r_bias = y[i][10], np2autograd(trust[i])
+            p_bias, r_bias = y[i][10], np2autograd(bias[i])
 
             loss_sent = self.sentiment_loss(p_sent, r_sent)
             loss_stance = self.stance_loss(p_stance, r_stance)
@@ -319,19 +321,22 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
   return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
 
 
-nb_epochs = 5
+nb_epochs = 1
 # batch_size = 47
 batch_size = 1
 nb_batches = 1956
+# nb_batches = 1
 # 2914
 # 1956
 
-gen = batch_generator(batch_size, nb_batches)
+gen = batch_generator(batch_size, nb_batches, dataset_file)
 
 model = JointMultiTaskModel()
 adam = optim.Adam(model.parameters(), lr=learning_rate)
 
 train_epoch_acc = []
+
+PATH = "saved_model.pt"
 
 for epoch in range(nb_epochs):
 
@@ -378,9 +383,14 @@ for epoch in range(nb_epochs):
         loss.sum().backward()
         adam.step()
         # print("out", out)
+
+        torch.save(model.state_dict(), PATH)
+
+
         model.eval() # enter evaluation mode
         with torch.no_grad():
               train_batch_acc.append(compare(out)) # evaluate mini-batch train accuracy in evaluation
+
     acc = accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
     print("Epoch: ", epoch, "Sentiment Accuracy: ", acc[0], "Stance Accuracy: ", acc[1], "Anger Accuracy: ", acc[2], "Anticipation Accuracy: ", acc[3], "Disgust Accuracy: ", acc[4], "Fear Accuracy: ", acc[5], "Joy Accuracy: ", acc[6], "Sadness Accuracy: ", acc[7], "Suprise Accuracy: ", acc[8], "Trust Accuracy: ", acc[9], "Bias Accuracy: ", acc[10])
 
