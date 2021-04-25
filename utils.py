@@ -183,7 +183,7 @@ def batch_generator_bias(batch_size, nb_batches, dataset_file, skip_batches=None
         if batch_count >= nb_batches:
             # dataset = get_dataset(batch_size, batch_number*nb_batches)
             # batch_number += 1
-            dataset = get_dataset(batch_size)
+            dataset = get_dataset(batch_size, dataset_file)
             batch_count = 0
 
 
