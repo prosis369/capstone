@@ -11,7 +11,7 @@ from pytorch_pretrained_bert import BertTokenizer, BertConfig
 from transformers import BertTokenizer
 from transformers import AutoTokenizer
 
-dataset_file = './test.csv'
+# dataset_file = './test.csv'
 
 from pytorch_pretrained_bert import BertTokenizer, BertConfig
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
@@ -61,7 +61,7 @@ def avg_cross_entropy_loss(predicted, targets):
     return loss
 
 
-def get_dataset(batch_size, skip=None):
+def get_dataset(batch_size, dataset_file, skip=None):
     """ Gets the dataset iterator
     """
     # dataset = pd.read_csv(dataset_file,
@@ -82,11 +82,11 @@ def get_dataset(batch_size, skip=None):
 
     return dataset
 
-def batch_generator(batch_size, nb_batches, skip_batches=None):
+def batch_generator(batch_size, nb_batches, dataset_file, skip_batches=None):
     """ Batch generator for the many task joint model.
     """
     batch_count = 0
-    dataset = get_dataset(batch_size, skip_batches)
+    dataset = get_dataset(batch_size, dataset_file, skip_batches)
     # batch_number = 1
 
     while True:
@@ -115,52 +115,76 @@ def batch_generator(batch_size, nb_batches, skip_batches=None):
         stance = (chunk['Stance']).values
         stance = np.int32(stance).reshape(-1, 1)
         anger = (chunk['Anger']).values
-        anger = np.int32(sent).reshape(-1, 1)
+        anger = np.int32(anger).reshape(-1, 1)
         anticipation = (chunk['Anticipation']).values
-        anticipation = np.int32(sent).reshape(-1, 1)
+        anticipation = np.int32(anticipation).reshape(-1, 1)
         disgust = (chunk['Disgust']).values
-        disgust = np.int32(sent).reshape(-1, 1)
+        disgust = np.int32(disgust).reshape(-1, 1)
         fear = (chunk['Fear']).values
-        fear = np.int32(sent).reshape(-1, 1)
+        fear = np.int32(fear).reshape(-1, 1)
         joy = (chunk['Joy']).values
-        joy = np.int32(sent).reshape(-1, 1)
+        joy = np.int32(joy).reshape(-1, 1)
         sadness = (chunk['Sadness']).values
-        sadness = np.int32(sent).reshape(-1, 1)
+        sadness = np.int32(sadness).reshape(-1, 1)
         surprise = (chunk['Surprise']).values
-        surprise = np.int32(sent).reshape(-1, 1)
+        surprise = np.int32(surprise).reshape(-1, 1)
         trust = (chunk['Trust']).values
-        trust = np.int32(sent).reshape(-1, 1)
+        trust = np.int32(trust).reshape(-1, 1)
         bias = (chunk['Bias']).values
-        bias = np.int32(sent).reshape(-1, 1)
+        bias = np.int32(bias).reshape(-1, 1)
 
         yield text, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias 
 
         batch_count += 1
 
         if batch_count >= nb_batches:
-            # dataset = get_dataset(batch_size, batch_number*nb_batches)
+            # dataset = get_dataset(batch_size, dataset_file, batch_number*nb_batches)
             # batch_number += 1
-            dataset = get_dataset(batch_size)
+            dataset = get_dataset(batch_size, dataset_file)
             batch_count = 0
 
+def batch_generator_bias(batch_size, nb_batches, dataset_file, skip_batches=None):
+    """ Batch generator for the many task joint model.
+    """
+    batch_count = 0
+    dataset = get_dataset(batch_size, dataset_file, skip_batches)
+    # batch_number = 1
 
-# def word2vec(word):
-#     """ Converts a word to its char-vector.
-#     """
-#     vec = map(c2k.get, word.lower())
-#     vec = list(vec)
-#
-#     return vec
-#
-#
-# def vec2word(vec):
-#     """ Converts a char-vector to its respective
-#         string.
-#     """
-#     word = map(k2c.get, vec)
-#     word = "".join(word)
-#
-#     return word
+    while True:
+        chunk = dataset.get_chunk()
+
+        # text, tags, chunks = [], [], []
+        text = []
+
+        # print(len(chunk['Tweet'].values))
+        
+
+        for sent in chunk['tweet'].values:
+            # print(sent)
+            # tags.append(sent2tags(sent))
+            # sent = sent[:4]
+            # text.append(sent2vec(sent))
+            text.append(sent2bert(sent))
+            # print(text)
+            # chunks.append(sent2chunk(sent))
+
+        # The sentiment of the review where 1 is positive and 0 is negative
+        # sent = (chunk['Score'] >= 4).values
+        # sent = np.int32(sent).reshape(-1, 1)
+
+        
+        bias = (chunk['subtask_a']).values
+        bias = np.int32(bias).reshape(-1, 1)
+
+        yield text, bias 
+
+        batch_count += 1
+
+        if batch_count >= nb_batches:
+            # dataset = get_dataset(batch_size, batch_number*nb_batches)
+            # batch_number += 1
+            dataset = get_dataset(batch_size, dataset_file)
+            batch_count = 0
 
 
 def sent2vec(sentence):
@@ -174,31 +198,7 @@ def sent2vec(sentence):
     vecs = [tokenizer.convert_tokens_to_ids(tokens[0])]
     # print(len(vecs[0]))
     return vecs
-'''
-def preprocessing_for_bert(data, tokenizer):
-    input_ids = []
-    attention_masks = []
 
-    # For every sentence...
-    for sent in data:
-        encoded_sent = tokenizer.encode_plus(
-            text=text_preprocessing(sent),  # Preprocess sentence
-            add_special_tokens=True,        # Add `[CLS]` and `[SEP]`
-            max_length=MAX_LEN,                  # Max length to truncate/pad
-            pad_to_max_length=True,         # Pad sentence to max length
-            #return_tensors='pt',           # Return PyTorch tensor
-            truncation = True,
-            return_attention_mask=True      # Return attention mask
-            )
-        input_ids.append(encoded_sent.get('input_ids'))
-        attention_masks.append(encoded_sent.get('attention_mask'))
-
-    # Convert lists to tensors
-    input_ids = torch.tensor(input_ids)
-    attention_masks = torch.tensor(attention_masks)
-
-    return input_ids, attention_masks
-'''
 def sent2bert(sentence):
   '''
     MAX_SEQUENCE_LENGTH = 100

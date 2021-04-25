@@ -1,10 +1,17 @@
+import torch
 from utils import sent2bert
 import pandas as pd
-import torch
+
 from torch.autograd import Variable
 from sklearn.metrics import accuracy_score
-from joint_model import model
-# from joint_model import accuracy
+from joint_model import JointMultiTaskModel
+PATH = "saved_model.pt"
+model = JointMultiTaskModel()
+model.load_state_dict(torch.load(PATH))
+model.eval()
+
+# print(model)
+
 
 def threshold(prediction, upperBound, lowerBound):
   if prediction >= upperBound:
@@ -109,7 +116,7 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
 def prediction(model):
     dataset_file = './train-completed.csv'
 
-    dataset = pd.read_csv(dataset_file, nrows=450)
+    dataset = pd.read_csv(dataset_file, nrows=4)
     tweets = list(dataset['Tweet'])
     # print(tweets[0])
     # print(tweets[0])
