@@ -364,17 +364,17 @@ def precision(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger
   # print(pred_stance)
   # print(stance_nb_batches)
 
-  sent_acc = precision_score(sent_nb_batches, pred_sent)
-  stance_acc = precision_score(stance_nb_batches, pred_stance)
-  anger_acc = precision_score(emotion_anger_nb_batches, pred_emotion_anger)
-  anticipation_acc = precision_score(emotion_anticipation_nb_batches, pred_emotion_anticipation)
-  disgust_acc = precision_score(emotion_disgust_nb_batches, pred_emotion_disgust)
-  fear_acc = precision_score(emotion_fear_nb_batches, pred_emotion_fear)
-  joy_acc = precision_score(emotion_joy_nb_batches, pred_emotion_joy)
-  sadness_acc = precision_score(emotion_sadness_nb_batches, pred_emotion_sadness)
-  surprise_acc = precision_score(emotion_surprise_nb_batches, pred_emotion_surprise)
-  trust_acc = precision_score(emotion_trust_nb_batches, pred_emotion_trust)
-  bias_acc = precision_score(bias_nb_batches, pred_bias)
+  sent_acc = precision_score(sent_nb_batches, pred_sent, average="weighted")
+  stance_acc = precision_score(stance_nb_batches, pred_stance,average="weighted")
+  anger_acc = precision_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
+  anticipation_acc = precision_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
+  disgust_acc = precision_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
+  fear_acc = precision_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
+  joy_acc = precision_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
+  sadness_acc = precision_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
+  surprise_acc = precision_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
+  trust_acc = precision_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
+  bias_acc = precision_score(bias_nb_batches, pred_bias,average="weighted")
   
   return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
 
@@ -413,17 +413,17 @@ def recall(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
   # print(pred_stance)
   # print(stance_nb_batches)
 
-  sent_acc = recall_score(sent_nb_batches, pred_sent)
-  stance_acc = recall_score(stance_nb_batches, pred_stance)
-  anger_acc = recall_score(emotion_anger_nb_batches, pred_emotion_anger)
-  anticipation_acc = recall_score(emotion_anticipation_nb_batches, pred_emotion_anticipation)
-  disgust_acc = recall_score(emotion_disgust_nb_batches, pred_emotion_disgust)
-  fear_acc = recall_score(emotion_fear_nb_batches, pred_emotion_fear)
-  joy_acc = recall_score(emotion_joy_nb_batches, pred_emotion_joy)
-  sadness_acc = recall_score(emotion_sadness_nb_batches, pred_emotion_sadness)
-  surprise_acc = recall_score(emotion_surprise_nb_batches, pred_emotion_surprise)
-  trust_acc = recall_score(emotion_trust_nb_batches, pred_emotion_trust)
-  bias_acc = recall_score(bias_nb_batches, pred_bias)
+  sent_acc = recall_score(sent_nb_batches, pred_sent,average="weighted")
+  stance_acc = recall_score(stance_nb_batches, pred_stance,average="weighted")
+  anger_acc = recall_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
+  anticipation_acc = recall_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
+  disgust_acc = recall_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
+  fear_acc = recall_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
+  joy_acc = recall_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
+  sadness_acc = recall_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
+  surprise_acc = recall_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
+  trust_acc = recall_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
+  bias_acc = recall_score(bias_nb_batches, pred_bias,average="weighted")
   
   return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
 
@@ -462,17 +462,17 @@ def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
   # print(pred_stance)
   # print(stance_nb_batches)
 
-  sent_acc = f1_score(sent_nb_batches, pred_sent)
-  stance_acc = f1_score(stance_nb_batches, pred_stance)
-  anger_acc = f1_score(emotion_anger_nb_batches, pred_emotion_anger)
-  anticipation_acc = f1_score(emotion_anticipation_nb_batches, pred_emotion_anticipation)
-  disgust_acc = f1_score(emotion_disgust_nb_batches, pred_emotion_disgust)
-  fear_acc = f1_score(emotion_fear_nb_batches, pred_emotion_fear)
-  joy_acc = f1_score(emotion_joy_nb_batches, pred_emotion_joy)
-  sadness_acc = f1_score(emotion_sadness_nb_batches, pred_emotion_sadness)
-  surprise_acc = f1_score(emotion_surprise_nb_batches, pred_emotion_surprise)
-  trust_acc = f1_score(emotion_trust_nb_batches, pred_emotion_trust)
-  bias_acc = f1_score(bias_nb_batches, pred_bias)
+  sent_acc = f1_score(sent_nb_batches, pred_sent,average="weighted")
+  stance_acc = f1_score(stance_nb_batches, pred_stance,average="weighted")
+  anger_acc = f1_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
+  anticipation_acc = f1_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
+  disgust_acc = f1_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
+  fear_acc = f1_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
+  joy_acc = f1_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
+  sadness_acc = f1_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
+  surprise_acc = f1_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
+  trust_acc = f1_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
+  bias_acc = f1_score(bias_nb_batches, pred_bias,average="weighted")
   
   return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
 
@@ -481,7 +481,7 @@ def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
 nb_epochs = 1
 # batch_size = 47
 batch_size = 1
-nb_batches = 50
+nb_batches = 10
 # nb_batches = 1
 # 2914
 # 1956
