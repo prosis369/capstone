@@ -17,7 +17,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 
 
-dataset_file = './test.csv'
+dataset_file = './train_new.csv'
 
 # Hyperparams
 learning_rate = 1e-3
@@ -218,7 +218,7 @@ class JointMultiTaskModel(nn.Module):
             bias_weight = 1
             emotion_weight = 1
 
-            loss = (loss_sent * (1/4)) + (loss_stance * (1/4)) + (loss_emotion_anger * (1/32)) + (loss_emotion_anticipation * (1/32)) + (loss_emotion_disgust * (1/32)) + (loss_emotion_fear * (1/32)) + (loss_emotion_joy * (1/32)) + (loss_emotion_sadness * (1/32)) + (loss_emotion_surprise * (1/32)) + (loss_emotion_trust * (1/32)) + (loss_bias * (1/4))
+            loss = (loss_sent * (3/20)) + (loss_stance * (1/2)) + (loss_emotion_anger * (3/160)) + (loss_emotion_anticipation * (3/160)) + (loss_emotion_disgust * (3/160)) + (loss_emotion_fear * (3/160)) + (loss_emotion_joy * (3/160)) + (loss_emotion_sadness * (3/160)) + (loss_emotion_surprise * (3/160)) + (loss_emotion_trust * (3/160)) + (loss_bias * (1/5))
             loss = loss/4
 
             losses.append(loss)
@@ -478,10 +478,10 @@ def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
 
 
 
-nb_epochs = 1
+nb_epochs = 5
 # batch_size = 47
 batch_size = 1
-nb_batches = 10
+nb_batches = 1300
 # nb_batches = 1
 # 2914
 # 1956
@@ -512,6 +512,9 @@ for epoch in range(nb_epochs):
     emotion_trust_nb_batches = []
     bias_nb_batches = []
 
+    PATH = "saved_model_jlm3_" + str(epoch) + ".pt"
+    print("Saving model ", PATH)
+
     for batch in range(nb_batches):
 
         text, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias = next(gen)
@@ -531,6 +534,7 @@ for epoch in range(nb_epochs):
         out = model.forward(text)
 
         loss = model.loss(out, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias)
+        
         print("Epoch:", epoch,
               "Batch:", batch,
               "Loss:", loss.data[0])
@@ -541,12 +545,11 @@ for epoch in range(nb_epochs):
         adam.step()
         # print("out", out)
 
-        torch.save(model.state_dict(), PATH)
-
-
         model.eval() # enter evaluation mode
         with torch.no_grad():
               train_batch_acc.append(compare(out)) # evaluate mini-batch train accuracy in evaluation
+        
+    torch.save(model.state_dict(), PATH)
 
     acc = accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
     prec = precision(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
