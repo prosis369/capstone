@@ -11,22 +11,16 @@ from sentiment import SentimentClassification
 from stance import StanceClassification
 from emotion import EmotionClassification
 from bias import BiasClassification
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import f1_score
+from transfer_bias import TransferBiasClassification
 
-
-dataset_file = './train_new.csv'
-
-# Hyperparams
-learning_rate = 1e-3
 postag_reg = 1e-3
 chunking_reg = 1e-3
 sentiment_reg = 1e-3
 stance_reg = 1e-3
 emotion_reg = 1e-3
 bias_reg = 1e-3
+
+BIAS_PATH = "epoch_0saved_model_bias_toxic10kAndOlidFull.pt"
 
 class JointMultiTaskModel(nn.Module):
     def __init__(self, mode='all'):
@@ -49,7 +43,9 @@ class JointMultiTaskModel(nn.Module):
         self.emotion_surprise = EmotionClassification()
         self.emotion_trust = EmotionClassification()
 
-        self.bias = BiasClassification()
+        self.bias = TransferBiasClassification()
+        self.bias.load_state_dict(torch.load(BIAS_PATH))
+        self.bias.eval()
 
         # Mode - all or module_name
         self.mode = mode
@@ -181,7 +177,7 @@ class JointMultiTaskModel(nn.Module):
 
         return loss
       
-    def loss(self, y, sentiment, stance, anger, anticipation, disgust, fear, joy, sadness, suprise, trust, bias):
+    def loss(self, y, sentiment, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias):
         # print("Hi i am in loss")
         losses = []
         # print("Hi i am in loss line 2")
@@ -218,7 +214,7 @@ class JointMultiTaskModel(nn.Module):
             bias_weight = 1
             emotion_weight = 1
 
-            loss = (loss_sent * (3/20)) + (loss_stance * (1/2)) + (loss_emotion_anger * (3/160)) + (loss_emotion_anticipation * (3/160)) + (loss_emotion_disgust * (3/160)) + (loss_emotion_fear * (3/160)) + (loss_emotion_joy * (3/160)) + (loss_emotion_sadness * (3/160)) + (loss_emotion_surprise * (3/160)) + (loss_emotion_trust * (3/160)) + (loss_bias * (1/5))
+            loss = (loss_sent * (1/6)) + (loss_stance * (1/3)) + (loss_emotion_anger * (1/48)) + (loss_emotion_anticipation * (1/48)) + (loss_emotion_disgust * (1/48)) + (loss_emotion_fear * (1/48)) + (loss_emotion_joy * (1/48)) + (loss_emotion_sadness * (1/48)) + (loss_emotion_surprise * (1/48)) + (loss_emotion_trust * (1/48)) + (loss_bias * (1/3))
             loss = loss/4
 
             losses.append(loss)
@@ -231,334 +227,4 @@ class JointMultiTaskModel(nn.Module):
         loss = loss / length
 
         return loss
-
-def threshold(prediction, upperBound, lowerBound):
-  if prediction >= upperBound:
-      prediction = 1
-  elif prediction < lowerBound:
-      prediction = -1
-  else:
-      prediction = 0
-  return prediction
-
-def compare(out):
-
-    # print(out)
-    predicted_sent = out[0][0].numpy()[0][0]
-    # print(predicted_sent)
-    predicted_sent = threshold(predicted_sent, 0.5, 0)
-    # print(predicted_sent)
-
-    predicted_stance = out[0][1].numpy()[0][0]
-    predicted_stance = threshold(predicted_stance, 0.5, 0)
-
-    predicted_emotion_anger = out[0][2].numpy()[0][0]
-    predicted_emotion_anger = threshold(predicted_emotion_anger, 0.5, 0)
-
-    predicted_emotion_anticipation = out[0][3].numpy()[0][0]
-    predicted_emotion_anticipation = threshold(predicted_emotion_anticipation, 0.5, 0)
-
-    predicted_emotion_disgust = out[0][4].numpy()[0][0]
-    predicted_emotion_disgust = threshold(predicted_emotion_disgust, 0.5, 0)
-
-    predicted_emotion_fear = out[0][5].numpy()[0][0]
-    predicted_emotion_fear = threshold(predicted_emotion_fear, 0.5, 0)
-
-    predicted_emotion_joy = out[0][6].numpy()[0][0]
-    predicted_emotion_joy = threshold(predicted_emotion_joy, 0.5, 0)
-
-    predicted_emotion_sadness = out[0][7].numpy()[0][0]
-    predicted_emotion_sadness = threshold(predicted_emotion_sadness, 0.5, 0)
-
-    predicted_emotion_surprise = out[0][8].numpy()[0][0]
-    predicted_emotion_surprise = threshold(predicted_emotion_surprise, 0.5, 0)
-
-    predicted_emotion_trust = out[0][9].numpy()[0][0]
-    predicted_emotion_trust = threshold(predicted_emotion_trust, 0.5, 0)
-
-    predicted_bias = out[0][10].numpy()[0][0]
-    predicted_bias = threshold(predicted_bias, 0.5, 0)
-    
-    return [predicted_sent, predicted_stance, predicted_emotion_anger, predicted_emotion_anticipation, predicted_emotion_disgust, predicted_emotion_fear, predicted_emotion_joy, predicted_emotion_sadness, predicted_emotion_surprise, predicted_emotion_trust, predicted_bias]
-
-def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches):
-
-  pred_sent = []
-  pred_stance = []
-  pred_emotion_anger = []
-  pred_emotion_anticipation = []
-  pred_emotion_disgust = []
-  pred_emotion_fear = []
-  pred_emotion_joy = []
-  pred_emotion_sadness = []
-  pred_emotion_surprise = []
-  pred_emotion_trust = []
-  pred_bias = []
-
-  l = len(train_batch_acc)
-
-  for i in range(l):
-    pred_sent.append(train_batch_acc[i][0])
-    pred_stance.append(train_batch_acc[i][1])
-    pred_emotion_anger.append(train_batch_acc[i][2])
-    pred_emotion_anticipation.append(train_batch_acc[i][3])
-    pred_emotion_disgust.append(train_batch_acc[i][4])
-    pred_emotion_fear.append(train_batch_acc[i][5])
-    pred_emotion_joy.append(train_batch_acc[i][6])
-    pred_emotion_sadness.append(train_batch_acc[i][7])
-    pred_emotion_surprise.append(train_batch_acc[i][8])
-    pred_emotion_trust.append(train_batch_acc[i][9])
-    pred_bias.append(train_batch_acc[i][10])
-
-  print(pred_sent)
-  print(sent_nb_batches)
-  # print(pred_stance)
-  # print(stance_nb_batches)
-
-  sent_acc = accuracy_score(sent_nb_batches, pred_sent)
-  stance_acc = accuracy_score(stance_nb_batches, pred_stance)
-  anger_acc = accuracy_score(emotion_anger_nb_batches, pred_emotion_anger)
-  anticipation_acc = accuracy_score(emotion_anticipation_nb_batches, pred_emotion_anticipation)
-  disgust_acc = accuracy_score(emotion_disgust_nb_batches, pred_emotion_disgust)
-  fear_acc = accuracy_score(emotion_fear_nb_batches, pred_emotion_fear)
-  joy_acc = accuracy_score(emotion_joy_nb_batches, pred_emotion_joy)
-  sadness_acc = accuracy_score(emotion_sadness_nb_batches, pred_emotion_sadness)
-  surprise_acc = accuracy_score(emotion_surprise_nb_batches, pred_emotion_surprise)
-  trust_acc = accuracy_score(emotion_trust_nb_batches, pred_emotion_trust)
-  bias_acc = accuracy_score(bias_nb_batches, pred_bias)
-  
-  return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
-
-
-def precision(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches):
-
-  pred_sent = []
-  pred_stance = []
-  pred_emotion_anger = []
-  pred_emotion_anticipation = []
-  pred_emotion_disgust = []
-  pred_emotion_fear = []
-  pred_emotion_joy = []
-  pred_emotion_sadness = []
-  pred_emotion_surprise = []
-  pred_emotion_trust = []
-  pred_bias = []
-
-  l = len(train_batch_acc)
-
-  for i in range(l):
-    pred_sent.append(train_batch_acc[i][0])
-    pred_stance.append(train_batch_acc[i][1])
-    pred_emotion_anger.append(train_batch_acc[i][2])
-    pred_emotion_anticipation.append(train_batch_acc[i][3])
-    pred_emotion_disgust.append(train_batch_acc[i][4])
-    pred_emotion_fear.append(train_batch_acc[i][5])
-    pred_emotion_joy.append(train_batch_acc[i][6])
-    pred_emotion_sadness.append(train_batch_acc[i][7])
-    pred_emotion_surprise.append(train_batch_acc[i][8])
-    pred_emotion_trust.append(train_batch_acc[i][9])
-    pred_bias.append(train_batch_acc[i][10])
-
-  print(pred_sent)
-  print(sent_nb_batches)
-  # print(pred_stance)
-  # print(stance_nb_batches)
-
-  sent_acc = precision_score(sent_nb_batches, pred_sent, average="weighted")
-  stance_acc = precision_score(stance_nb_batches, pred_stance,average="weighted")
-  anger_acc = precision_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
-  anticipation_acc = precision_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
-  disgust_acc = precision_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
-  fear_acc = precision_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
-  joy_acc = precision_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
-  sadness_acc = precision_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
-  surprise_acc = precision_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
-  trust_acc = precision_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
-  bias_acc = precision_score(bias_nb_batches, pred_bias,average="weighted")
-  
-  return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
-
-
-def recall(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches):
-
-  pred_sent = []
-  pred_stance = []
-  pred_emotion_anger = []
-  pred_emotion_anticipation = []
-  pred_emotion_disgust = []
-  pred_emotion_fear = []
-  pred_emotion_joy = []
-  pred_emotion_sadness = []
-  pred_emotion_surprise = []
-  pred_emotion_trust = []
-  pred_bias = []
-
-  l = len(train_batch_acc)
-
-  for i in range(l):
-    pred_sent.append(train_batch_acc[i][0])
-    pred_stance.append(train_batch_acc[i][1])
-    pred_emotion_anger.append(train_batch_acc[i][2])
-    pred_emotion_anticipation.append(train_batch_acc[i][3])
-    pred_emotion_disgust.append(train_batch_acc[i][4])
-    pred_emotion_fear.append(train_batch_acc[i][5])
-    pred_emotion_joy.append(train_batch_acc[i][6])
-    pred_emotion_sadness.append(train_batch_acc[i][7])
-    pred_emotion_surprise.append(train_batch_acc[i][8])
-    pred_emotion_trust.append(train_batch_acc[i][9])
-    pred_bias.append(train_batch_acc[i][10])
-
-  print(pred_sent)
-  print(sent_nb_batches)
-  # print(pred_stance)
-  # print(stance_nb_batches)
-
-  sent_acc = recall_score(sent_nb_batches, pred_sent,average="weighted")
-  stance_acc = recall_score(stance_nb_batches, pred_stance,average="weighted")
-  anger_acc = recall_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
-  anticipation_acc = recall_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
-  disgust_acc = recall_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
-  fear_acc = recall_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
-  joy_acc = recall_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
-  sadness_acc = recall_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
-  surprise_acc = recall_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
-  trust_acc = recall_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
-  bias_acc = recall_score(bias_nb_batches, pred_bias,average="weighted")
-  
-  return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
-
-
-def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches):
-
-  pred_sent = []
-  pred_stance = []
-  pred_emotion_anger = []
-  pred_emotion_anticipation = []
-  pred_emotion_disgust = []
-  pred_emotion_fear = []
-  pred_emotion_joy = []
-  pred_emotion_sadness = []
-  pred_emotion_surprise = []
-  pred_emotion_trust = []
-  pred_bias = []
-
-  l = len(train_batch_acc)
-
-  for i in range(l):
-    pred_sent.append(train_batch_acc[i][0])
-    pred_stance.append(train_batch_acc[i][1])
-    pred_emotion_anger.append(train_batch_acc[i][2])
-    pred_emotion_anticipation.append(train_batch_acc[i][3])
-    pred_emotion_disgust.append(train_batch_acc[i][4])
-    pred_emotion_fear.append(train_batch_acc[i][5])
-    pred_emotion_joy.append(train_batch_acc[i][6])
-    pred_emotion_sadness.append(train_batch_acc[i][7])
-    pred_emotion_surprise.append(train_batch_acc[i][8])
-    pred_emotion_trust.append(train_batch_acc[i][9])
-    pred_bias.append(train_batch_acc[i][10])
-
-  print(pred_sent)
-  print(sent_nb_batches)
-  # print(pred_stance)
-  # print(stance_nb_batches)
-
-  sent_acc = f1_score(sent_nb_batches, pred_sent,average="weighted")
-  stance_acc = f1_score(stance_nb_batches, pred_stance,average="weighted")
-  anger_acc = f1_score(emotion_anger_nb_batches, pred_emotion_anger,average="weighted")
-  anticipation_acc = f1_score(emotion_anticipation_nb_batches, pred_emotion_anticipation,average="weighted")
-  disgust_acc = f1_score(emotion_disgust_nb_batches, pred_emotion_disgust,average="weighted")
-  fear_acc = f1_score(emotion_fear_nb_batches, pred_emotion_fear,average="weighted")
-  joy_acc = f1_score(emotion_joy_nb_batches, pred_emotion_joy,average="weighted")
-  sadness_acc = f1_score(emotion_sadness_nb_batches, pred_emotion_sadness,average="weighted")
-  surprise_acc = f1_score(emotion_surprise_nb_batches, pred_emotion_surprise,average="weighted")
-  trust_acc = f1_score(emotion_trust_nb_batches, pred_emotion_trust,average="weighted")
-  bias_acc = f1_score(bias_nb_batches, pred_bias,average="weighted")
-  
-  return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
-
-
-
-nb_epochs = 5
-# batch_size = 47
-batch_size = 1
-nb_batches = 1300
-# nb_batches = 1
-# 2914
-# 1956
-
-gen = batch_generator(batch_size, nb_batches, dataset_file)
-
-model = JointMultiTaskModel()
-adam = optim.Adam(model.parameters(), lr=learning_rate)
-
-train_epoch_acc = []
-
-PATH = "saved_model.pt"
-
-for epoch in range(nb_epochs):
-
-    train_batch_loss = []
-    train_batch_acc = []
-
-    sent_nb_batches = []
-    stance_nb_batches = []
-    emotion_anger_nb_batches = []
-    emotion_anticipation_nb_batches = []
-    emotion_disgust_nb_batches = []
-    emotion_fear_nb_batches = []
-    emotion_joy_nb_batches = []
-    emotion_sadness_nb_batches = []
-    emotion_surprise_nb_batches = []
-    emotion_trust_nb_batches = []
-    bias_nb_batches = []
-
-    PATH = "saved_model_jlm3_" + str(epoch) + ".pt"
-    print("Saving model ", PATH)
-
-    for batch in range(nb_batches):
-
-        text, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias = next(gen)
-
-        sent_nb_batches.append(sent[0][0])
-        stance_nb_batches.append(stance[0][0])
-        emotion_anger_nb_batches.append(anger[0][0])
-        emotion_anticipation_nb_batches.append(anticipation[0][0])
-        emotion_disgust_nb_batches.append(disgust[0][0])
-        emotion_fear_nb_batches.append(fear[0][0])
-        emotion_joy_nb_batches.append(joy[0][0])
-        emotion_sadness_nb_batches.append(sadness[0][0])
-        emotion_surprise_nb_batches.append(surprise[0][0])
-        emotion_trust_nb_batches.append(trust[0][0])
-        bias_nb_batches.append(bias[0][0])
-        
-        out = model.forward(text)
-
-        loss = model.loss(out, sent, stance, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, bias)
-        
-        print("Epoch:", epoch,
-              "Batch:", batch,
-              "Loss:", loss.data[0])
-
-        adam.zero_grad()
-        # loss.backward()
-        loss.sum().backward()
-        adam.step()
-        # print("out", out)
-
-        model.eval() # enter evaluation mode
-        with torch.no_grad():
-              train_batch_acc.append(compare(out)) # evaluate mini-batch train accuracy in evaluation
-        
-    torch.save(model.state_dict(), PATH)
-
-    acc = accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
-    prec = precision(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
-    rec = recall(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
-    fsc = fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb_batches, emotion_anticipation_nb_batches, emotion_disgust_nb_batches, emotion_fear_nb_batches, emotion_joy_nb_batches, emotion_sadness_nb_batches, emotion_surprise_nb_batches, emotion_trust_nb_batches, bias_nb_batches)
-
-    print("Epoch: ", epoch, "Sentiment Accuracy: ", acc[0], "Stance Accuracy: ", acc[1], "Anger Accuracy: ", acc[2], "Anticipation Accuracy: ", acc[3], "Disgust Accuracy: ", acc[4], "Fear Accuracy: ", acc[5], "Joy Accuracy: ", acc[6], "Sadness Accuracy: ", acc[7], "Suprise Accuracy: ", acc[8], "Trust Accuracy: ", acc[9], "Bias Accuracy: ", acc[10])
-    print("Epoch: ", epoch, "Sentiment Precision: ", prec[0], "Stance Precision: ", prec[1], "Anger Precision: ", prec[2], "Anticipation Precision: ", prec[3], "Disgust Precision: ", prec[4], "Fear Precision: ", prec[5], "Joy Precision: ", prec[6], "Sadness Precision: ", prec[7], "Suprise Precision: ", prec[8], "Trust Precision: ", prec[9], "Bias Precision: ", prec[10])
-    print("Epoch: ", epoch, "Sentiment Recall: ", rec[0], "Stance Recall: ", rec[1], "Anger Recall: ", rec[2], "Anticipation Recall: ", rec[3], "Disgust Recall: ", rec[4], "Fear Recall: ", rec[5], "Joy Recall: ", rec[6], "Sadness Recall: ", rec[7], "Suprise Recall: ", rec[8], "Trust Recall: ", rec[9], "Bias Recall: ", rec[10])
-    print("Epoch: ", epoch, "Sentiment F1-Score: ", fsc[0], "Stance F1-Score: ", fsc[1], "Anger F1-Score: ", fsc[2], "Anticipation F1-Score: ", fsc[3], "Disgust F1-Score: ", fsc[4], "Fear F1-Score: ", fsc[5], "Joy F1-Score: ", fsc[6], "Sadness F1-Score: ", fsc[7], "Suprise F1-Score: ", fsc[8], "Trust F1-Score: ", fsc[9], "Bias F1-Score: ", fsc[10])
-
 
