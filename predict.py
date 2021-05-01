@@ -96,12 +96,12 @@ def accuracy(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_
     pred_emotion_trust.append(train_batch_acc[i][9])
     pred_bias.append(train_batch_acc[i][10])
 
-  print(pred_sent)
-  print(sent_nb_batches)
+  # print(pred_sent)
+  # print(sent_nb_batches)
   # print(pred_stance)
   # print(stance_nb_batches)
-  print(emotion_anger_nb_batches)
-  print(pred_emotion_anger)
+  # print(emotion_anger_nb_batches)
+  # print(pred_emotion_anger)
 
   sent_acc = accuracy_score(sent_nb_batches, pred_sent)
   stance_acc = accuracy_score(stance_nb_batches, pred_stance)
@@ -146,8 +146,8 @@ def precision(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger
     pred_emotion_trust.append(train_batch_acc[i][9])
     pred_bias.append(train_batch_acc[i][10])
 
-  print(pred_sent)
-  print(sent_nb_batches)
+  # print(pred_sent)
+  # print(sent_nb_batches)
   # print(pred_stance)
   # print(stance_nb_batches)
 
@@ -195,8 +195,8 @@ def recall(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
     pred_emotion_trust.append(train_batch_acc[i][9])
     pred_bias.append(train_batch_acc[i][10])
 
-  print(pred_sent)
-  print(sent_nb_batches)
+  # print(pred_sent)
+  # print(sent_nb_batches)
   # print(pred_stance)
   # print(stance_nb_batches)
 
@@ -244,8 +244,8 @@ def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
     pred_emotion_trust.append(train_batch_acc[i][9])
     pred_bias.append(train_batch_acc[i][10])
 
-  print(pred_sent)
-  print(sent_nb_batches)
+  # print(pred_sent)
+  # print(sent_nb_batches)
   # print(pred_stance)
   # print(stance_nb_batches)
 

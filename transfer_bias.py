@@ -44,7 +44,7 @@ class TransferBiasClassification(nn.Module):
 
     def forward(self, x):
         # Runs the LSTM for each word-vector in the sentence x
-        # x = [x]
+        x = [x]
         x = torch.tensor(x, dtype=torch.float32)
         out, hn = self.bi_lstm(x, (self.h[:, :x.size(1), :],
                                    self.w[:, :x.size(1), :]))
@@ -116,6 +116,7 @@ def accuracy(train_batch_acc, bias_nb_batches):
   
   return(bias_acc)
 
+'''
 nb_epochs = 1
 # batch_size = 47
 batch_size = 1
@@ -165,3 +166,4 @@ for epoch in range(nb_epochs):
     acc = accuracy(train_batch_acc, transfer_bias_nb_batches)
     print("Epoch: ", epoch, "Bias Accuracy: ", acc[0])
 
+'''
