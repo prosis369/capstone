@@ -10,7 +10,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 
 
-PATH = "saved_model_jlm3_0.pt"
+PATH = "saved_model_final_1.pt"
 model = JointMultiTaskModel()
 model.load_state_dict(torch.load(PATH))
 model.eval()
@@ -18,11 +18,105 @@ model.eval()
 # print(model)
 
 
-def threshold(prediction, upperBound, lowerBound):
+def threshold_sentiment(prediction, upperBound, lowerBound):
+  # train_predictions_sent.append(prediction)
+
   if prediction >= upperBound:
       prediction = 1
   elif prediction < lowerBound:
       prediction = -1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_stance(prediction, upperBound, lowerBound):
+  # train_predictions_stance.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  elif prediction < lowerBound:
+      prediction = -1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_anger(prediction, upperBound, lowerBound):
+  # train_predictions_anger.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_anticipation(prediction, upperBound, lowerBound):
+  # train_predictions_anticipation.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_disgust(prediction, upperBound, lowerBound):
+  # train_predictions_disgust.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_fear(prediction, upperBound, lowerBound):
+  # train_predictions_fear.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_joy(prediction, upperBound, lowerBound):
+  # train_predictions_joy.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_sadness(prediction, upperBound, lowerBound):
+  # train_predictions_sadness.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_surprise(prediction, upperBound, lowerBound):
+  # train_predictions_surprise.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_emotion_trust(prediction, upperBound, lowerBound):
+  # train_predictions_trust.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
+  else:
+      prediction = 0
+  return prediction
+
+def threshold_bias(prediction, upperBound, lowerBound):
+  # train_predictions_bias.append(prediction)
+
+  if prediction >= upperBound:
+      prediction = 1
   else:
       prediction = 0
   return prediction
@@ -32,38 +126,38 @@ def compare(out):
     # print(out)
     predicted_sent = out[0][0]
     # print(predicted_sent)
-    predicted_sent = threshold(predicted_sent, 0.5, 0)
+    predicted_sent = threshold_sentiment(predicted_sent, 0.5, 0)
     # print(predicted_sent)
 
     predicted_stance = out[0][1]
-    predicted_stance = threshold(predicted_stance, 0.5, 0)
+    predicted_stance = threshold_stance(predicted_stance, 0.5, 0)
 
     predicted_emotion_anger = out[0][2]
-    predicted_emotion_anger = threshold(predicted_emotion_anger, 0.5, 0)
+    predicted_emotion_anger = threshold_emotion_anger(predicted_emotion_anger, 0.5, 0)
 
     predicted_emotion_anticipation = out[0][3]
-    predicted_emotion_anticipation = threshold(predicted_emotion_anticipation, 0.5, 0)
+    predicted_emotion_anticipation = threshold_emotion_anticipation(predicted_emotion_anticipation, 0.5, 0)
 
     predicted_emotion_disgust = out[0][4]
-    predicted_emotion_disgust = threshold(predicted_emotion_disgust, 0.5, 0)
+    predicted_emotion_disgust = threshold_emotion_disgust(predicted_emotion_disgust, 0.5, 0)
 
     predicted_emotion_fear = out[0][5]
-    predicted_emotion_fear = threshold(predicted_emotion_fear, 0.5, 0)
+    predicted_emotion_fear = threshold_emotion_fear(predicted_emotion_fear, 0.5, 0)
 
     predicted_emotion_joy = out[0][6]
-    predicted_emotion_joy = threshold(predicted_emotion_joy, 0.5, 0)
+    predicted_emotion_joy = threshold_emotion_joy(predicted_emotion_joy, 0.5, 0)
 
     predicted_emotion_sadness = out[0][7]
-    predicted_emotion_sadness = threshold(predicted_emotion_sadness, 0.5, 0)
+    predicted_emotion_sadness = threshold_emotion_sadness(predicted_emotion_sadness, 0.5, 0)
 
     predicted_emotion_surprise = out[0][8]
-    predicted_emotion_surprise = threshold(predicted_emotion_surprise, 0.5, 0)
+    predicted_emotion_surprise = threshold_emotion_surprise(predicted_emotion_surprise, 0.5, 0)
 
     predicted_emotion_trust = out[0][9]
-    predicted_emotion_trust = threshold(predicted_emotion_trust, 0.5, 0)
+    predicted_emotion_trust = threshold_emotion_trust(predicted_emotion_trust, 0.5, 0)
 
     predicted_bias = out[0][10]
-    predicted_bias = threshold(predicted_bias, 0.5, 0)
+    predicted_bias = threshold_bias(predicted_bias, 0.5, 0)
     
     return [predicted_sent, predicted_stance, predicted_emotion_anger, predicted_emotion_anticipation, predicted_emotion_disgust, predicted_emotion_fear, predicted_emotion_joy, predicted_emotion_sadness, predicted_emotion_surprise, predicted_emotion_trust, predicted_bias]
 
@@ -264,9 +358,9 @@ def fscore(train_batch_acc, sent_nb_batches, stance_nb_batches, emotion_anger_nb
   return(sent_acc, stance_acc, anger_acc, anticipation_acc, disgust_acc, fear_acc, joy_acc, sadness_acc, surprise_acc, trust_acc, bias_acc)
 
 def prediction(model):
-    dataset_file = './train-completed.csv'
+    dataset_file = './test-edit-final.csv'
 
-    dataset = pd.read_csv(dataset_file, nrows=4)
+    dataset = pd.read_csv(dataset_file)
     tweets = list(dataset['Tweet'])
     # print(tweets[0])
     # print(tweets[0])

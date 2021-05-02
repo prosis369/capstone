@@ -382,6 +382,7 @@ def mapPrediction(predicted_bias, bias_nb_batches, task):
   # print(predicted_bias)
   actual_0 = []
   actual_1 = []
+  actual_neg = []
 
   for i in range(len(predicted_bias)):
 
@@ -390,8 +391,10 @@ def mapPrediction(predicted_bias, bias_nb_batches, task):
     
     if bias_nb_batches[i] == 0:
       actual_0.append(predicted_bias[i])
-    else:
+    elif bias_nb_batches[i] == 1:
       actual_1.append(predicted_bias[i])
+    else:
+      actual_neg.append(predicted_bias[i])
 
     # print(actual_0)
     # print(actual_1)
@@ -400,13 +403,14 @@ def mapPrediction(predicted_bias, bias_nb_batches, task):
   # print(type(actual_0[0]))
   print("ZERO " + task, actual_0)
   print("ONE " + task, actual_1)
+  print("NEG" + task, actual_neg)
   print("--------------------------------------------------")
 
 
 nb_epochs = 1
 # batch_size = 47
 batch_size = 1
-nb_batches = 10
+nb_batches = 2090
 # nb_batches = 1
 # 2914
 # 1956
@@ -431,7 +435,7 @@ train_predictions_trust = []
 train_predictions_bias = []
 
 
-PATH = "saved_model.pt"
+# PATH = "saved_model.pt"
 
 for epoch in range(nb_epochs):
 
@@ -463,7 +467,7 @@ for epoch in range(nb_epochs):
     emotion_trust_nb_batches = []
     bias_nb_batches = []
 
-    PATH = "saved_model_final_" + str(epoch) + ".pt"
+    PATH = "saved_model_trial_" + str(epoch) + ".pt"
     print("Saving model ", PATH)
 
     for batch in range(nb_batches):

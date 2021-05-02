@@ -20,7 +20,7 @@ stance_reg = 1e-3
 emotion_reg = 1e-3
 bias_reg = 1e-3
 
-BIAS_PATH = "epoch_0saved_model_bias_toxic10kAndOlidFull.pt"
+BIAS_PATH = "epoch_0saved_model_bias_toxic1kAndOlid5k.pt"
 
 class JointMultiTaskModel(nn.Module):
     def __init__(self, mode='all'):
@@ -114,66 +114,101 @@ class JointMultiTaskModel(nn.Module):
     def sentiment_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.sentiment.w.norm() ** 2) * sentiment_reg
+        # m = nn.LogSoftmax(dim=1)
+        # conv = nn.Conv2d(16, C, (3, 3))
+        # print(y)
+        # print(yt)
+        # print(y.size())
+        # y = torch.reshape(y, (1, 1, 1))
+        # print(y)
+        # print(y.size())
+        # y = torch.reshape(yt, (1, 1))
+        # target = torch.tensor([yt])
+        # loss_function = nn.CrossEntropyLoss()
+        # loss = loss_function(y, yt)
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
 
     def stance_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.stance.w.norm() ** 2) * stance_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
       
     def emotion_anger_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_anger.w.norm() ** 2) * emotion_reg
+      
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
     
     def emotion_anticipation_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_anticipation.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
     
     def emotion_disgust_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_disgust.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
     
     def emotion_fear_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_fear.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
 
     def emotion_joy_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_joy.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
     
     def emotion_sadness_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_sadness.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
       
     def emotion_surprise_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_surprise.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
     
     def emotion_trust_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.emotion_trust.w.norm() ** 2) * emotion_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
 
     def bias_loss(self, y, yt):
         loss = (yt.float() - y) ** 2 \
                + (self.bias.w.norm() ** 2) * bias_reg
+        # loss_function = nn.NLLLoss()
+        # loss = loss_function(y, yt)
 
         return loss
       
