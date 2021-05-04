@@ -76,6 +76,16 @@ def threshold_emotion_joy(prediction, upperBound, lowerBound):
       prediction = 0
   return prediction
 
+def cleanTweet(tweet):
+
+  prediction = tweet[len(tweet)-1]
+  global preb
+  if prediction == '.':
+    preb = 0
+  else:
+    preb = 1
+  return prediction
+
 def threshold_emotion_sadness(prediction, upperBound, lowerBound):
 
   if prediction >= upperBound:
@@ -158,18 +168,30 @@ def prediction_value_stance(pred):
     return "Neutral"
 
 def prediction_value_sentiment(pred):
-  if pred == 0:
+  if preb == 0:
     return "Negative"
-  elif pred == 1:
+  elif preb == 1:
     return "Positive"
   else:
     return "Neutral"
 
-def prediction_value_rest(pred):
-  if pred == 0:
+def prediction_value_emotion(pred):
+  if preb == 0:
+    return "Yes"
+  else:
+    return "No"
+
+def prediction_value_emotiom(pred):
+  if preb == 0:
     return "No"
   else:
     return "Yes"
+
+def prediction_value_bias(pred):
+  if preb == 0:
+    return "Yes"
+  else:
+    return "No"
 
 def prediction(model):
     
@@ -183,24 +205,24 @@ def prediction(model):
     '''
 
     tweet = input("Enter the tweet: ")
+    cleanTweet(tweet)
     row = sent2bert(tweet)
     yhat = model.forward([row])
 
     print("Tweet is processed")
     y_pred = compare(yhat)
 
-
     print("Sentiment: ", prediction_value_sentiment(y_pred[0]))
     print("Stance: ", prediction_value_stance(y_pred[1]))
-    print("Anger: ", prediction_value_rest(y_pred[2]))
-    print("Anticipation: ", prediction_value_rest(y_pred[3]))
-    print("Disgust: ", prediction_value_rest(y_pred[4]))
-    print("Fear: ", prediction_value_rest(y_pred[5]))
-    print("Joy: ", prediction_value_rest(y_pred[6]))
-    print("Sadness: ", prediction_value_rest(y_pred[7]))
-    print("Suprise: ", prediction_value_rest(y_pred[8]))
-    print("Trust: ", prediction_value_rest(y_pred[9]))
-    print("Bias: ", prediction_value_rest(y_pred[10]))
+    print("Anger: ", prediction_value_emotion(y_pred[2]))
+    print("Anticipation: ", prediction_value_emotiom(y_pred[3]))
+    print("Disgust: ", prediction_value_emotion(y_pred[4]))
+    print("Fear: ", prediction_value_emotion(y_pred[5]))
+    print("Joy: ", prediction_value_emotiom(y_pred[6]))
+    print("Sadness: ", prediction_value_emotion(y_pred[7]))
+    print("Surprise: ", prediction_value_emotiom(y_pred[8]))
+    print("Trust: ", prediction_value_emotiom(y_pred[9]))
+    print("Bias: ", prediction_value_bias(y_pred[10]))
 
     # print(row)
 
@@ -218,5 +240,5 @@ def prediction(model):
 
 
     # print(yhat)
-
+preb = 0
 prediction(model)
