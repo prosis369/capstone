@@ -149,11 +149,19 @@ def compare(out):
     
     return [predicted_sent, predicted_stance, predicted_emotion_anger, predicted_emotion_anticipation, predicted_emotion_disgust, predicted_emotion_fear, predicted_emotion_joy, predicted_emotion_sadness, predicted_emotion_surprise, predicted_emotion_trust, predicted_bias]
 
-def prediction_value_sent_stance(pred):
+def prediction_value_stance(pred):
   if pred == 0:
     return "Against"
   elif pred == 1:
     return "Favour"
+  else:
+    return "Neutral"
+
+def prediction_value_sentiment(pred):
+  if pred == 0:
+    return "Negative"
+  elif pred == 1:
+    return "Positive"
   else:
     return "Neutral"
 
@@ -180,11 +188,10 @@ def prediction(model):
 
     print("Tweet is processed")
     y_pred = compare(yhat)
-    print(y_pred)
 
 
-    print("Sentiment: ", prediction_value_sent_stance(y_pred[0]))
-    print("Stance: ", prediction_value_sent_stance(y_pred[1]))
+    print("Sentiment: ", prediction_value_sentiment(y_pred[0]))
+    print("Stance: ", prediction_value_stance(y_pred[1]))
     print("Anger: ", prediction_value_rest(y_pred[2]))
     print("Anticipation: ", prediction_value_rest(y_pred[3]))
     print("Disgust: ", prediction_value_rest(y_pred[4]))
